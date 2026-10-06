@@ -1,0 +1,17 @@
+# pliki systemowe / edytory
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# edytory
+.vscode/
+.idea/
+
+# node / zależności (gdyby ktoś odpalał lokalnie)
+node_modules/
+npm-debug.log*
+
+# dane i pliki testowe (nie wrzucamy danych uczniów do publicznego repo)
+*.csv
+*.pdf
+*.docx

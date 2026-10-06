@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator sprawozdania wychowawcy (Librus)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Sprawozdanie wychowawcy klasy</h1>
+      <p class="subtitle">Wgraj plik <strong>CSV</strong> pobrany z Librus Synergia (raport „Klasyfikacja"), uzupełnij brakujące pola i pobierz gotowy dokument Word.</p>
+    </header>
+
+    <!-- KROK 1: WGRANIE PLIKU -->
+    <section class="card" id="drop-card">
+      <h2>1. Wgraj plik z Librusa</h2>
+      <div id="dropzone" class="dropzone">
+        <p class="dropzone-title"><strong>Przeciągnij tutaj plik CSV</strong> z Librusa<br><span>albo kliknij, aby wybrać plik</span></p>
+        <p class="hint">W Librus Synergia: <strong>Statystyki → Klasyfikacja śródroczna / roczna</strong>, potem <strong>Eksport do CSV</strong>.<br>Można też wgrać zapisany <strong>PDF</strong> tego raportu (opcjonalnie).</p>
+        <input type="file" id="file-input" accept=".csv,.pdf,text/csv,application/pdf" hidden>
+      </div>
+      <div id="file-status" class="file-status"></div>
+    </section>
+
+    <!-- KROK 2: PODSUMOWANIE -->
+    <section class="card hidden" id="summary-card">
+      <h2>2. Rozpoznane dane</h2>
+      <div id="summary" class="summary"></div>
+    </section>
+
+    <!-- KROK 3: POLA MANUALNE -->
+    <section class="card hidden" id="form-card">
+      <h2>3. Pola do uzupełnienia ręcznie</h2>
+      <p class="hint">Dane, których nie ma w pliku CSV (uzasadnienia, przyczyny itp.). Pola tabelaryczne można wypełniać liniami, oddzielając kolumny znakiem <code>;</code>.</p>
+
+      <fieldset>
+        <legend>Nagłówek</legend>
+        <div class="grid">
+          <label>Wychowawca (imię i nazwisko)
+            <input type="text" id="f-wychowawca" placeholder="np. Michał Niedźwiecki">
+          </label>
+          <label id="semestr-field">Semestr
+            <select id="f-semestr">
+              <option value="I">I</option>
+              <option value="II" selected>II</option>
+            </select>
+          </label>
+          <label>Stan klasy na dzień (pkt 4) — liczba uczniów
+            <input type="number" id="f-stan-liczba" placeholder="np. 30" min="0">
+          </label>
+          <label>Data (pkt 4) — opcjonalnie
+            <input type="text" id="f-stan-data" placeholder="np. 1.X.2026">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Frekwencja — dane za cały rok szkolny (kolumna „rok szkolny" w pkt 8)</legend>
+        <p class="hint">Semestr (kolumna „Semestr") jest liczony automatycznie z pliku CSV. Poniżej uzupełnij wartości narastające za cały rok.</p>
+        <div class="grid">
+          <label>Stan frekwencji w % (rok)
+            <input type="text" id="f-frekw-proc-rok" placeholder="np. 87,46%">
+          </label>
+          <label>Stan frekwencji w % (semestr) — opcjonalnie nadpisz
+            <input type="text" id="f-frekw-proc-sem" placeholder="auto">
+          </label>
+          <label>Godziny opuszczone (rok)
+            <input type="text" id="f-frekw-op-rok" placeholder="np. 3765">
+          </label>
+          <label>Godziny nieusprawiedliwione (rok)
+            <input type="text" id="f-frekw-nieusp-rok" placeholder="np. 479">
+          </label>
+          <label>Spóźnienia (rok)
+            <input type="text" id="f-frekw-spoz-rok" placeholder="np. 84">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sekcje opisowe</legend>
+        <div class="grid two-col">
+          <label>Pkt 10 — przyczyny niepowodzeń uczniów z 3+ ocen ndst
+            <textarea id="f-przyczyny-ndst" rows="3" placeholder="Imię Nazwisko – przyczyna..."></textarea>
+          </label>
+          <label>Pkt 12 — uczniowie ze szczególnymi osiągnięciami
+            <textarea id="f-osiagniecia" rows="3" placeholder="Imię Nazwisko – osiągnięcie..."></textarea>
+          </label>
+          <label>Pkt 13 — przyczyny nieobecności (>70 h nieusprawiedliwionych)
+            <textarea id="f-przyczyny-70h" rows="3" placeholder="Imię Nazwisko – przyczyna..."></textarea>
+          </label>
+          <label>Pkt 14 — przedmioty z diagnozami / maturą próbną
+            <textarea id="f-diagnoza" rows="3" placeholder="np. matematyka, język polski"></textarea>
+          </label>
+          <label>Pkt 16 — nieklasyfikowani (liniami: <code>Imię Nazwisko;przedmioty;egzamin klasyfikacyjny</code>)
+            <textarea id="f-nieklasyfikowani" rows="3" placeholder="Jan Kowalski;język angielski;tak"></textarea>
+          </label>
+          <label>Pkt 20 — uczniowie, którzy przerwali naukę (liniami: <code>Imię Nazwisko;przyczyna</code>)
+            <textarea id="f-przerwali" rows="3" placeholder="Bogdan Marcel;zmiana miejsca zamieszkania"></textarea>
+          </label>
+          <label>Pkt 17 — uzasadnienie oceny wzorowej
+            <textarea id="f-uzas-wzorowa" rows="3" placeholder="Zgodnie z zasadami WSO..."></textarea>
+          </label>
+          <label>Pkt 19 — uzasadnienie oceny nagannej
+            <textarea id="f-uzas-naganna" rows="3" placeholder="..."></textarea>
+          </label>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- KROK 4: GENERUJ -->
+    <section class="card hidden" id="download-card">
+      <h2>4. Pobierz dokument</h2>
+      <button id="btn-generate" class="btn-primary">Pobierz sprawozdanie (.docx)</button>
+      <div id="generate-status" class="file-status"></div>
+    </section>
+
+    <footer>
+      <p>Dane są przetwarzane <strong>wyłącznie w Twojej przeglądarce</strong> — nic nie jest wysyłane na serwer. Działa jako strona statyczna (GitHub Pages, Cloudflare Pages, home.pl).</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/pdf-parser.js"></script>
+  <script src="js/obliczenia.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
