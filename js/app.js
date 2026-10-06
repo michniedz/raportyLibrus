@@ -72,10 +72,6 @@ function renderSummary(model, stats) {
   });
 }
 
-function isAnnualType(type) {
-  return /roczna|ko\u0144cowa|kocowa/i.test(type || "");
-}
-
 function applyModelToForm(model) {
   // ukryj pole "Semestr" dla raportu rocznego/końcowego
   const semestrField = $("semestr-field");

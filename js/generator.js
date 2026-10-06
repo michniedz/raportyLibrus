@@ -90,13 +90,20 @@ function namesParagraph(list) {
   return P(list.length ? list.join(", ") : "—");
 }
 
+/** Czy typ raportu to klasyfikacja roczna/końcowa (a nie śródroczna). */
+function isAnnualType(type) {
+  const t = (type || "").toLowerCase();
+  if (t.includes("śródroczna") || t.includes("srodroczna") || t.includes("ródroczna")) return false;
+  return t.includes("roczna") || t.includes("końcowa") || t.includes("kocowa");
+}
+
 /**
  * Główna funkcja: generuje dokument Word na podstawie modelu, statystyk i formularza.
  */
 function generujDocx(model, stats, form) {
   const semestr = form.semestr === "I" ? "I" : "II";
   const rok = model.rokSzkolny || "…";
-  const isAnnual = /roczna|ko\u0144cowa|kocowa/i.test(model.type || "");
+  const isAnnual = isAnnualType(model.type);
   const title = isAnnual
     ? `Sprawozdanie wychowawcy klasy za rok szkolny ${rok}`
     : `Sprawozdanie wychowawcy klasy za semestr ${semestr} roku szkolnego ${rok}`;
