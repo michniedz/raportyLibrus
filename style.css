@@ -144,6 +144,72 @@ header h1 {
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
 }
 
+/* ---- instrukcja pobierania plików ---- */
+.help-box {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fbfcfe;
+  overflow: hidden;
+}
+.help-box summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--primary-dark);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.help-box summary::-webkit-details-marker { display: none; }
+.help-box summary::before {
+  content: "ℹ";
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.help-box summary::after {
+  content: "▾";
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform .15s;
+}
+.help-box[open] summary { border-bottom: 1px solid var(--border); }
+.help-box[open] summary::after { transform: rotate(180deg); }
+.help-content { padding: 6px 16px 16px; }
+.help-intro { margin: 12px 0 4px; font-size: .88rem; color: #334155; }
+.help-content h4 {
+  margin: 16px 0 6px;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.help-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.help-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 6px;
+  font-size: .86rem;
+  color: #334155;
+  line-height: 1.5;
+}
+.help-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
 /* ---- status pliku ---- */
 .file-status {
   margin-top: 14px;

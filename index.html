@@ -20,9 +20,33 @@
       <div id="dropzone" class="dropzone">
         <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <p class="dropzone-title"><strong>Przeciągnij tutaj pliki CSV</strong> z Librusa<br><span>albo kliknij, aby wybrać pliki (można kilka naraz)</span></p>
-        <p class="hint">Wgraj jednocześnie:<br><strong>1)</strong> raport „Klasyfikacja” (śródroczna / roczna / końcowa) — <strong>Eksport do CSV</strong>,<br><strong>2)</strong> „Procentowe zestawienie frekwencji” (1 plik dla śródrocznej, 2 pliki dla rocznej).<br>Można też wgrać zapisany <strong>PDF</strong> raportu klasyfikacji (opcjonalnie).</p>
+        <p class="hint">Wgraj naraz: <strong>„Klasyfikacja"</strong> + <strong>„Procentowe zestawienie frekwencji"</strong> (śródroczna — 1 plik frekwencji, roczna/końcowa — 2 pliki). Można też wgrać zapisany <strong>PDF</strong> klasyfikacji (opcjonalnie).</p>
         <input type="file" id="file-input" accept=".csv,.pdf,text/csv,application/pdf" multiple hidden>
       </div>
+      <details class="help-box">
+        <summary>Jak pobrać pliki CSV z Librus Synergia?</summary>
+        <div class="help-content">
+          <p class="help-intro">Wchodzimy do <strong>dziennika Librus</strong> i otwieramy zakładkę <strong>„Statystyki"</strong> (prawy górny róg). Po wybraniu odpowiedniej statystyki klikamy <strong>„Eksport do CSV"</strong>.</p>
+
+          <h4>I semestr — wszystkie klasy</h4>
+          <ul class="help-list">
+            <li><code>Statystyki → Statystyki główne → Klasyfikacja śródroczna</code></li>
+            <li><code>Statystyki → Statystyki główne → Procentowe zestawienie frekwencji szczegółowo</code> — w polu „Miesiąc" wybieramy <strong>Okres 1</strong></li>
+          </ul>
+
+          <h4>II semestr — klasy 1, 2, 3, 4 technikum oraz klasy 1, 2 branżowej szkoły I stopnia</h4>
+          <ul class="help-list">
+            <li><code>Statystyki → Statystyki główne → Klasyfikacja roczna</code></li>
+            <li><code>Statystyki → Statystyki główne → Procentowe zestawienie frekwencji szczegółowo</code> — dwa pliki: „Miesiąc" = <strong>Okres 1</strong> oraz drugi plik „Miesiąc" = <strong>Wszystko</strong></li>
+          </ul>
+
+          <h4>II semestr — klasa 5 technikum oraz klasa 3 branżowej szkoły I stopnia</h4>
+          <ul class="help-list">
+            <li><code>Statystyki → Statystyki główne → Klasyfikacja końcowa</code></li>
+            <li><code>Statystyki → Statystyki główne → Procentowe zestawienie frekwencji szczegółowo</code> — dwa pliki: „Miesiąc" = <strong>Okres 1</strong> oraz drugi plik „Miesiąc" = <strong>Wszystko</strong></li>
+          </ul>
+        </div>
+      </details>
       <div id="file-status" class="file-status"></div>
     </section>
 
