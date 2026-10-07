@@ -19,7 +19,6 @@ function hide(el) { el.classList.add("hidden"); }
 function collectForm() {
   return {
     wychowawca: $("f-wychowawca").value.trim(),
-    semestr: $("f-semestr").value,
     stanLiczba: $("f-stan-liczba").value.trim(),
     frekwProcentRok: $("f-frekw-proc-rok").value.trim(),
     frekwProcentSem: $("f-frekw-proc-sem").value.trim(),
@@ -79,15 +78,9 @@ function renderSummary(model, stats, frekw) {
 }
 
 function applyModelToForm(model) {
-  // ukryj pole "Semestr" dla raportu rocznego/końcowego
-  const semestrField = $("semestr-field");
-  if (semestrField) {
-    if (isAnnualType(model.type)) hide(semestrField);
-    else show(semestrField);
-  }
-  // nagłówek kolumny frekwencji: "Semestr" (śródroczna) vs "I semestr" (roczna/końcowa)
+  // nagłówek kolumny frekwencji: "Semestr I" (śródroczna) vs "II semestr" (roczna/końcowa)
   const semHead = $("frekw-sem-head");
-  if (semHead) semHead.textContent = isAnnualType(model.type) ? "I semestr" : "Semestr";
+  if (semHead) semHead.textContent = isAnnualType(model.type) ? "II semestr" : "Semestr I";
   // jeśli pole wychowawcy jest puste, a PDF zawiera wychowawcę — uzupełnij
   if (model.wychowawca && !$("f-wychowawca").value.trim()) {
     $("f-wychowawca").value = model.wychowawca;

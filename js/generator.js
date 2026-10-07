@@ -101,12 +101,12 @@ function isAnnualType(type) {
  * Główna funkcja: generuje dokument Word na podstawie modelu, statystyk i formularza.
  */
 function generujDocx(model, stats, form, hasRok) {
-  const semestr = form.semestr === "I" ? "I" : "II";
   const rok = model.rokSzkolny || "…";
   const isAnnual = isAnnualType(model.type);
+  // śródroczna = semestr I, roczna/końcowa = cały rok szkolny
   const title = isAnnual
     ? `Sprawozdanie wychowawcy klasy za rok szkolny ${rok}`
-    : `Sprawozdanie wychowawcy klasy za semestr ${semestr} roku szkolnego ${rok}`;
+    : `Sprawozdanie wychowawcy klasy za semestr I roku szkolnego ${rok}`;
   const children = [];
 
   // ---- Tytuł ----
@@ -149,7 +149,7 @@ function generujDocx(model, stats, form, hasRok) {
   // ---- Pkt 8 ----
   children.push(heading("8. Frekwencja:"));
   {
-    const semColLabel = isAnnual ? "I semestr" : `Semestr ${semestr}`;
+    const semColLabel = isAnnual ? "II semestr" : "Semestr I";
     const semProc = form.frekwProcentSem || "";
     const semOp   = form.frekwOpSem || "";
     const semNsp  = form.frekwNieuspSem || "";
@@ -230,7 +230,7 @@ function generujDocx(model, stats, form, hasRok) {
     rows70.push(row([cell(names70[i] || "", { width: 50 }), cell("", { width: 50 })]));
   }
   children.push(table([
-    row([cell("II semestr", { width: 50, align: CENTER, bold: true, shading: "EEEEEE" }), cell("Rok szkolny", { width: 50, align: CENTER, bold: true, shading: "EEEEEE" })]),
+    row([cell(isAnnual ? "II semestr" : "Semestr I", { width: 50, align: CENTER, bold: true, shading: "EEEEEE" }), cell("Rok szkolny", { width: 50, align: CENTER, bold: true, shading: "EEEEEE" })]),
     ...rows70,
   ]));
   if (form.przyczyny70h) {
