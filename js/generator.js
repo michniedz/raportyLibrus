@@ -225,7 +225,7 @@ function generujDocx(model, stats, form, hasRok) {
   children.push(heading("13. Uczniowie, którzy opuścili powyżej 70 godz. nieusprawiedliwionych (wraz z podaniem przyczyn nieobecności):"));
   const names70 = stats.uczniowie70hNieusp.map(x => x.nazwisko);
   const rows70 = [];
-  const maxRows = Math.max(8, names70.length);
+  const maxRows = Math.max(1, names70.length);
   for (let i = 0; i < maxRows; i++) {
     rows70.push(row([cell(names70[i] || "", { width: 50 }), cell("", { width: 50 })]));
   }
