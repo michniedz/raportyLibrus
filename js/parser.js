@@ -99,15 +99,17 @@ function parseLibrusCSV(text) {
     throw new Error("Nieprawidłowa struktura nagłówka (za mało kolumn).");
   }
 
-  // Liczba przedmiotów (S). Najbardziej wiarygodna jest struktura wiersza 2
-  // nagłówka: [3]=pierwszy przedmiot, potem oceny "6"…"1", potem "usp."/"nieus.".
-  let S = -1;
+  // Liczba przedmiotów (S). Struktura wiersza 2 nagłówka: [3]=pierwszy przedmiot,
+  // potem oceny "6"…"1". Raporty śródroczne/roczne mają dodatkowo kolumny
+  // frekwencji "usp."/"nieus."/"spóźn.", a końcowe ich nie mają.
+  const hasAttendance = header2.some(c => /^usp\.?$|^nieus\.?$/i.test(c));
   const uspIdx = header2.findIndex(c => /^usp\.?$/i.test(c));
+  let S = -1;
   if (uspIdx > 6) {
     S = uspIdx - 9; // uspIdx = 3 + S + 6  =>  S = uspIdx - 9
   } else {
     const firstStudentRow = rows[headerIdx + 2];
-    if (firstStudentRow) S = firstStudentRow.length - 13;
+    if (firstStudentRow) S = firstStudentRow.length - (hasAttendance ? 13 : 10);
   }
   if (S < 1) {
     throw new Error("Nie można określić liczby przedmiotów z nagłówka.");
@@ -123,10 +125,10 @@ function parseLibrusCSV(text) {
     subjectsEnd: 3 + S,          // wyłączny
     gradesStart: 3 + S,          // 6,5,4,3,2,1
     grade1: 3 + S + 5,           // liczba ocen "1" (ndst)
-    usp: 3 + S + 6,
-    nieus: 3 + S + 7,
-    spozn: 3 + S + 8,
-    srednia: 3 + S + 9,
+    usp: hasAttendance ? 3 + S + 6 : null,
+    nieus: hasAttendance ? 3 + S + 7 : null,
+    spozn: hasAttendance ? 3 + S + 8 : null,
+    srednia: 3 + S + (hasAttendance ? 9 : 6),
   };
 
   const students = [];
@@ -156,9 +158,9 @@ function parseLibrusCSV(text) {
         2: r[idx.gradesStart + 4] || "0",
         1: r[idx.grade1] || "0",
       },
-      usp: r[idx.usp] || "0",
-      nieus: r[idx.nieus] || "0",
-      spozn: r[idx.spozn] || "0",
+      usp: (idx.usp != null ? (r[idx.usp] || "0") : "0"),
+      nieus: (idx.nieus != null ? (r[idx.nieus] || "0") : "0"),
+      spozn: (idx.spozn != null ? (r[idx.spozn] || "0") : "0"),
       srednia: r[idx.srednia] || "",
     });
   }
@@ -174,4 +176,94 @@ function parseLibrusCSV(text) {
     subjects,
     students,
   };
+}
+
+/**
+ * Wykrywa typ pliku tekstowego (CSV) po zawartości.
+ * Zwraca "klasyfikacja", "frekwencja" lub "unknown".
+ */
+function detectFileType(text) {
+  const head = (text || "").slice(0, 600);
+  if (/^\s*Klasyfikacja\b/i.test(head)) return "klasyfikacja";
+  if (/Procentowe zestawienie frekwencji|% obecno/i.test(head)) return "frekwencja";
+  return "unknown";
+}
+
+/**
+ * Parsuje raport „Procentowe zestawienie frekwencji” i zwraca podsumowanie klasy.
+ * Kolumny wiersza RAZEM: 2=obecności, 3=nieob. uspr., 4=nieob. nieuspr.,
+ * 5=nieob. razem, 6=razem godzin, 7=% obecności.
+ */
+function parseFrekwencjaCSV(text) {
+  const rows = parseCsv(text)
+    .map(r => r.map(c => c.replace(/^\uFEFF/, "").trim()))
+    .filter(r => r.some(c => c !== ""));
+
+  if (!rows.length) throw new Error("Plik frekwencji jest pusty.");
+
+  let klasa = "";
+  let rokSzkolny = "";
+  let miesiac = "";
+  for (const r of rows) {
+    const first = (r[0] || "").trim();
+    if (/^Klasa$/i.test(first)) klasa = (r[1] || "").trim();
+    else if (/^Rok szkolny/i.test(first)) rokSzkolny = first.replace(/^Rok szkolny\s*/i, "").trim();
+    else if (/^Miesi[iąą]c$/i.test(first)) miesiac = (r[1] || "").trim();
+  }
+
+  let razem = null;
+  for (const r of rows) {
+    if (/^RAZEM/i.test(r[0])) { razem = r; break; }
+  }
+  if (!razem) throw new Error("Brak wiersza „RAZEM” w pliku frekwencji.");
+
+  const toInt = (v) => {
+    const n = parseInt(String(v || "").replace(/\s/g, ""), 10);
+    return Number.isNaN(n) ? 0 : n;
+  };
+
+  const obecnosci = toInt(razem[2]);
+  const nieusprUsp = toInt(razem[3]);   // nieobecności usprawiedliwione
+  const nieusprNieus = toInt(razem[4]); // nieobecności nieusprawiedliwione
+  const opuszczone = razem[5] ? toInt(razem[5]) : (nieusprUsp + nieusprNieus);
+  const razemGodz = razem[6] ? toInt(razem[6]) : (obecnosci + opuszczone);
+  const procentObecnosci = (razem[7] || "").trim();
+
+  return {
+    klasa,
+    rokSzkolny,
+    miesiac,
+    procentObecnosci,             // np. "92.25%"
+    godzinyOpuszczone: opuszczone,           // nieobecności razem (usp. + nieusp.)
+    godzinyNieusprawiedliwione: nieusprNieus, // nieobecności nieusprawiedliwione
+    godzinyUsprawiedliwione: nieusprUsp,
+    godzinyObowiazkowe: razemGodz,           // obecności + nieobecności (razem)
+  };
+}
+
+/**
+ * Przyporządkowuje sparsowane pliki frekwencji do kolumn „semestr” i „rok”.
+ * Jeden plik = zestawienie semestralne. Dwa pliki = plik z większą liczbą
+ * godzin obowiązkowych to cały rok szkolny.
+ */
+function classifyFrekwencja(files) {
+  if (!files || !files.length) return { semestr: null, rok: null };
+
+  if (files.length === 1) {
+    return { semestr: files[0], rok: null };
+  }
+
+  const sorted = files.slice().sort((a, b) => b.godzinyObowiazkowe - a.godzinyObowiazkowe);
+  let rok = sorted[0];
+  let semestr = sorted[1];
+
+  // Remis liczbowy — spróbuj po nazwie pliku.
+  if (rok.godzinyObowiazkowe === semestr.godzinyObowiazkowe) {
+    const byName = (re) => files.find(f => re.test(f.sourceName || ""));
+    const rokByName = byName(/rocz|kocow|koncow|caly|calorocz/i);
+    const semByName = byName(/semestr|srodrocz|r\u00f3drocz/i);
+    if (rokByName && semByName) { rok = rokByName; semestr = semByName; }
+  }
+
+  return { semestr, rok };
 }

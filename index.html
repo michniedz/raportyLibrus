@@ -10,16 +10,16 @@
   <div class="container">
     <header>
       <h1>Sprawozdanie wychowawcy klasy</h1>
-      <p class="subtitle">Wgraj plik <strong>CSV</strong> pobrany z Librus Synergia (raport „Klasyfikacja"), uzupełnij brakujące pola i pobierz gotowy dokument Word.</p>
+      <p class="subtitle">Wgraj pliki <strong>CSV</strong> z Librus Synergia („Klasyfikacja" + „Procentowe zestawienie frekwencji"), uzupełnij brakujące pola i pobierz gotowy dokument Word.</p>
     </header>
 
     <!-- KROK 1: WGRANIE PLIKU -->
     <section class="card" id="drop-card">
-      <h2>1. Wgraj plik z Librusa</h2>
+      <h2>1. Wgraj pliki z Librusa</h2>
       <div id="dropzone" class="dropzone">
-        <p class="dropzone-title"><strong>Przeciągnij tutaj plik CSV</strong> z Librusa<br><span>albo kliknij, aby wybrać plik</span></p>
-        <p class="hint">W Librus Synergia: <strong>Statystyki → Klasyfikacja śródroczna / roczna</strong>, potem <strong>Eksport do CSV</strong>.<br>Można też wgrać zapisany <strong>PDF</strong> tego raportu (opcjonalnie).</p>
-        <input type="file" id="file-input" accept=".csv,.pdf,text/csv,application/pdf" hidden>
+        <p class="dropzone-title"><strong>Przeciągnij tutaj pliki CSV</strong> z Librusa<br><span>albo kliknij, aby wybrać pliki (można kilka naraz)</span></p>
+        <p class="hint">Wgraj jednocześnie:<br><strong>1)</strong> raport „Klasyfikacja” (śródroczna / roczna / końcowa) — <strong>Eksport do CSV</strong>,<br><strong>2)</strong> „Procentowe zestawienie frekwencji” (1 plik dla śródrocznej, 2 pliki dla rocznej).<br>Można też wgrać zapisany <strong>PDF</strong> raportu klasyfikacji (opcjonalnie).</p>
+        <input type="file" id="file-input" accept=".csv,.pdf,text/csv,application/pdf" multiple hidden>
       </div>
       <div id="file-status" class="file-status"></div>
     </section>
@@ -57,24 +57,39 @@
       </fieldset>
 
       <fieldset>
-        <legend>Frekwencja — dane za cały rok szkolny (kolumna „rok szkolny" w pkt 8)</legend>
-        <p class="hint">Semestr (kolumna „Semestr") jest liczony automatycznie z pliku CSV. Poniżej uzupełnij wartości narastające za cały rok.</p>
-        <div class="grid">
-          <label>Stan frekwencji w % (rok)
-            <input type="text" id="f-frekw-proc-rok" placeholder="np. 87,46%">
-          </label>
-          <label>Stan frekwencji w % (semestr) — opcjonalnie nadpisz
-            <input type="text" id="f-frekw-proc-sem" placeholder="auto">
-          </label>
-          <label>Godziny opuszczone (rok)
-            <input type="text" id="f-frekw-op-rok" placeholder="np. 3765">
-          </label>
-          <label>Godziny nieusprawiedliwione (rok)
-            <input type="text" id="f-frekw-nieusp-rok" placeholder="np. 479">
-          </label>
-          <label>Spóźnienia (rok)
-            <input type="text" id="f-frekw-spoz-rok" placeholder="np. 84">
-          </label>
+        <legend>Frekwencja (pkt 8)</legend>
+        <p class="hint">Wypełniane automatycznie z plików „Procentowe zestawienie frekwencji” (i klasyfikacji). Możesz poprawić każdą wartość ręcznie.</p>
+        <div class="frekw-grid">
+          <div>
+            <h4 class="frekw-head" id="frekw-sem-head">Semestr</h4>
+            <label>Stan frekwencji w %
+              <input type="text" id="f-frekw-proc-sem" placeholder="auto">
+            </label>
+            <label>Godziny opuszczone
+              <input type="text" id="f-frekw-op-sem" placeholder="auto">
+            </label>
+            <label>Godziny nieusprawiedliwione
+              <input type="text" id="f-frekw-nieusp-sem" placeholder="auto">
+            </label>
+            <label>Spóźnienia
+              <input type="text" id="f-frekw-spoz-sem" placeholder="auto">
+            </label>
+          </div>
+          <div>
+            <h4 class="frekw-head">rok szkolny</h4>
+            <label>Stan frekwencji w %
+              <input type="text" id="f-frekw-proc-rok" placeholder="auto">
+            </label>
+            <label>Godziny opuszczone
+              <input type="text" id="f-frekw-op-rok" placeholder="auto">
+            </label>
+            <label>Godziny nieusprawiedliwione
+              <input type="text" id="f-frekw-nieusp-rok" placeholder="auto">
+            </label>
+            <label>Spóźnienia
+              <input type="text" id="f-frekw-spoz-rok" placeholder="auto">
+            </label>
+          </div>
         </div>
       </fieldset>
 

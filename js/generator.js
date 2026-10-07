@@ -145,28 +145,26 @@ function generujDocx(model, stats, form) {
 
   // ---- Pkt 8 ----
   children.push(heading("8. Frekwencja:"));
-  if (isAnnual) {
+  {
+    const semColLabel = isAnnual ? "I semestr" : `Semestr ${semestr}`;
+    const semProc = form.frekwProcentSem || "";
+    const semOp   = form.frekwOpSem || "";
+    const semNsp  = form.frekwNieuspSem || "";
+    const semSpz  = form.frekwSpozSem || "";
+    const rokProc = form.frekwProcentRok || "";
+    const rokOp   = form.frekwOpRok || "";
+    const rokNsp  = form.frekwNieuspRok || "";
+    const rokSpz  = form.frekwSpozRok || "";
     children.push(table([
       row([
         cell("", { width: 40, shading: "EEEEEE" }),
-        cell("rok szkolny", { width: 60, align: CENTER, bold: true, shading: "EEEEEE" }),
-      ]),
-      row([cell("Stan frekwencji w %", { width: 40 }), cell(form.frekwProcentRok || "—", { width: 60, align: CENTER })]),
-      row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(String(stats.godzinyOpuszczone), { width: 60, align: CENTER })]),
-      row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(String(stats.godzinyNieusprawiedliwione), { width: 60, align: CENTER })]),
-      row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(String(stats.spoznienia), { width: 60, align: CENTER })]),
-    ]));
-  } else {
-    children.push(table([
-      row([
-        cell("", { width: 40, shading: "EEEEEE" }),
-        cell(`Semestr ${semestr}`, { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
+        cell(semColLabel, { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
         cell("rok szkolny", { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
       ]),
-      row([cell("Stan frekwencji w %", { width: 40 }), cell(form.frekwProcentSem || "—", { width: 30, align: CENTER }), cell(form.frekwProcentRok || "—", { width: 30, align: CENTER })]),
-      row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(String(stats.godzinyOpuszczone), { width: 30, align: CENTER }), cell(form.frekwOpRok || "", { width: 30, align: CENTER })]),
-      row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(String(stats.godzinyNieusprawiedliwione), { width: 30, align: CENTER }), cell(form.frekwNieuspRok || "", { width: 30, align: CENTER })]),
-      row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(String(stats.spoznienia), { width: 30, align: CENTER }), cell(form.frekwSpozRok || "", { width: 30, align: CENTER })]),
+      row([cell("Stan frekwencji w %", { width: 40 }), cell(semProc || "—", { width: 30, align: CENTER }), cell(rokProc || "—", { width: 30, align: CENTER })]),
+      row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(semOp || "—", { width: 30, align: CENTER }), cell(rokOp || "—", { width: 30, align: CENTER })]),
+      row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(semNsp || "—", { width: 30, align: CENTER }), cell(rokNsp || "—", { width: 30, align: CENTER })]),
+      row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(semSpz || "—", { width: 30, align: CENTER }), cell(rokSpz || "—", { width: 30, align: CENTER })]),
     ]));
   }
 

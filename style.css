@@ -98,6 +98,7 @@ header h1 {
 .file-status { margin-top: 12px; font-size: .9rem; min-height: 1.2em; font-weight: 500; }
 .file-status.ok { color: var(--accent); }
 .file-status.err { color: var(--danger); }
+.file-status.warn { color: #b45309; }
 
 .summary {
   display: grid;
@@ -126,6 +127,11 @@ fieldset {
   margin: 0 0 16px;
 }
 legend { font-weight: 600; padding: 0 8px; font-size: .92rem; }
+
+.frekw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.frekw-head { margin: 0 0 4px; font-size: .88rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.frekw-grid label { margin-bottom: 10px; }
+@media (max-width: 640px) { .frekw-grid { grid-template-columns: 1fr; } }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .grid.two-col { grid-template-columns: 1fr 1fr; }

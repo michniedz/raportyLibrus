@@ -1,9 +1,10 @@
 /* ============================================================
-   app.js — obsługa UI: wgrywanie pliku, podsumowanie, generowanie
+   app.js — obsługa UI: wgrywanie plików, podsumowanie, generowanie
    ============================================================ */
 
 let currentModel = null;
 let currentStats = null;
+let currentFrekwencja = { semestr: null, rok: null };
 
 const $ = (id) => document.getElementById(id);
 
@@ -26,6 +27,9 @@ function collectForm() {
     frekwOpRok: $("f-frekw-op-rok").value.trim(),
     frekwNieuspRok: $("f-frekw-nieusp-rok").value.trim(),
     frekwSpozRok: $("f-frekw-spoz-rok").value.trim(),
+    frekwOpSem: $("f-frekw-op-sem").value.trim(),
+    frekwNieuspSem: $("f-frekw-nieusp-sem").value.trim(),
+    frekwSpozSem: $("f-frekw-spoz-sem").value.trim(),
     przyczynyNdst: $("f-przyczyny-ndst").value,
     osiagniecia: $("f-osiagniecia").value,
     przyczyny70h: $("f-przyczyny-70h").value,
@@ -37,7 +41,7 @@ function collectForm() {
   };
 }
 
-function renderSummary(model, stats) {
+function renderSummary(model, stats, frekw) {
   const s = stats;
   const z = s.zachowanie;
   const rows = [
@@ -55,6 +59,9 @@ function renderSummary(model, stats) {
     ["Godz. nieuspraw.", s.godzinyNieusprawiedliwione],
     ["Spóźnienia", s.spoznienia],
   ];
+  if (frekw && frekw.semestr) rows.push(["% frekwencji (semestr)", frekw.semestr.procentObecnosci || "—"]);
+  if (frekw && frekw.rok) rows.push(["% frekwencji (rok)", frekw.rok.procentObecnosci || "—"]);
+
   const container = $("summary");
   container.innerHTML = "";
   rows.forEach(([k, v]) => {
@@ -79,6 +86,9 @@ function applyModelToForm(model) {
     if (isAnnualType(model.type)) hide(semestrField);
     else show(semestrField);
   }
+  // nagłówek kolumny frekwencji: "Semestr" (śródroczna) vs "I semestr" (roczna/końcowa)
+  const semHead = $("frekw-sem-head");
+  if (semHead) semHead.textContent = isAnnualType(model.type) ? "I semestr" : "Semestr";
   // jeśli pole wychowawcy jest puste, a PDF zawiera wychowawcę — uzupełnij
   if (model.wychowawca && !$("f-wychowawca").value.trim()) {
     $("f-wychowawca").value = model.wychowawca;
@@ -86,33 +96,114 @@ function applyModelToForm(model) {
   }
 }
 
-async function handleFile(file) {
-  const status = $("file-status");
-  try {
-    if (!file) return;
-    const buffer = await file.arrayBuffer();
-    const name = file.name.toLowerCase();
+function setVal(id, val) {
+  const el = $(id);
+  if (el) el.value = (val == null ? "" : String(val));
+}
 
-    if (name.endsWith(".pdf")) {
-      setStatus(status, "Wczytywanie PDF…");
-      const pdfjsLib = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
-      currentModel = await parseLibrusPdf(buffer, pdfjsLib);
-    } else {
-      const text = decodeLibrusFile(buffer);
-      currentModel = parseLibrusCSV(text);
+function fillFrekwencjaForm(model, stats, frekw) {
+  const isAnnual = isAnnualType(model.type);
+  const sem = frekw.semestr;
+  const rok = frekw.rok;
+
+  // Kolumna „Semestr / I semestr”
+  setVal("f-frekw-proc-sem", sem ? sem.procentObecnosci : "");
+  if (isAnnual) {
+    // dane I semestru pochodzą z pliku frekwencji "semestr"
+    setVal("f-frekw-op-sem", sem ? sem.godzinyOpuszczone : "");
+    setVal("f-frekw-nieusp-sem", sem ? sem.godzinyNieusprawiedliwione : "");
+    setVal("f-frekw-spoz-sem", ""); // spóźnień nie ma w plikach frekwencji
+  } else {
+    // śródroczna: semestr liczony z klasyfikacji
+    setVal("f-frekw-op-sem", stats.godzinyOpuszczone);
+    setVal("f-frekw-nieusp-sem", stats.godzinyNieusprawiedliwione);
+    setVal("f-frekw-spoz-sem", stats.spoznienia);
+  }
+
+  // Kolumna „rok szkolny”
+  setVal("f-frekw-proc-rok", rok ? rok.procentObecnosci : "");
+  if (rok) {
+    setVal("f-frekw-op-rok", rok.godzinyOpuszczone);
+    setVal("f-frekw-nieusp-rok", rok.godzinyNieusprawiedliwione);
+    setVal("f-frekw-spoz-rok", isAnnual ? stats.spoznienia : "");
+  } else if (isAnnual) {
+    // brak pliku "rok" — fallback na klasyfikację roczną/końcową
+    setVal("f-frekw-op-rok", stats.godzinyOpuszczone);
+    setVal("f-frekw-nieusp-rok", stats.godzinyNieusprawiedliwione);
+    setVal("f-frekw-spoz-rok", stats.spoznienia);
+  } else {
+    setVal("f-frekw-op-rok", "");
+    setVal("f-frekw-nieusp-rok", "");
+    setVal("f-frekw-spoz-rok", "");
+  }
+}
+
+async function handleFiles(fileList) {
+  const files = Array.from(fileList || []);
+  const status = $("file-status");
+  if (!files.length) return;
+
+  let classification = null;
+  const frekwencjaFiles = [];
+  const warnings = [];
+  let pdfjsLib = null;
+
+  try {
+    for (const file of files) {
+      const name = file.name.toLowerCase();
+      if (name.endsWith(".pdf")) {
+        setStatus(status, "Wczytywanie PDF…");
+        if (!pdfjsLib) {
+          pdfjsLib = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+          pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+        }
+        classification = await parseLibrusPdf(await file.arrayBuffer(), pdfjsLib);
+      } else {
+        const buffer = await file.arrayBuffer();
+        const text = decodeLibrusFile(buffer);
+        const type = detectFileType(text);
+        if (type === "klasyfikacja") {
+          classification = parseLibrusCSV(text);
+        } else if (type === "frekwencja") {
+          const f = parseFrekwencjaCSV(text);
+          f.sourceName = file.name;
+          frekwencjaFiles.push(f);
+        } else {
+          warnings.push(`„${file.name}” — nie rozpoznano typu pliku.`);
+        }
+      }
     }
 
+    if (!classification) {
+      throw new Error("Nie znaleziono pliku klasyfikacji („Klasyfikacja …”). Dodaj go razem z plikami frekwencji.");
+    }
+
+    currentModel = classification;
     currentStats = computeStats(currentModel);
-    renderSummary(currentModel, currentStats);
+    currentFrekwencja = classifyFrekwencja(frekwencjaFiles);
+
+    renderSummary(currentModel, currentStats, currentFrekwencja);
     applyModelToForm(currentModel);
+    fillFrekwencjaForm(currentModel, currentStats, currentFrekwencja);
+
     show($("summary-card"));
     show($("form-card"));
     show($("download-card"));
-    setStatus(status, `Wczytano „${file.name}" — ${currentModel.students.length} uczniów.`, "ok");
+
+    const parts = [`Wczytano ${files.length} ${files.length === 1 ? "plik" : "pliki"}`];
+    parts.push(`klasyfikacja: ${currentModel.students.length} uczniów`);
+    if (currentFrekwencja.semestr || currentFrekwencja.rok) {
+      const labels = [];
+      if (currentFrekwencja.semestr) labels.push("semestr");
+      if (currentFrekwencja.rok) labels.push("rok");
+      parts.push(`frekwencja: ${labels.join(" + ")}`);
+    }
+    if (warnings.length) parts.push(warnings.join(" "));
+    setStatus(status, parts.join(" • ") + ".", warnings.length ? "warn" : "ok");
   } catch (err) {
     currentModel = null;
     currentStats = null;
+    currentFrekwencja = { semestr: null, rok: null };
     hide($("summary-card"));
     hide($("form-card"));
     hide($("download-card"));
@@ -155,7 +246,7 @@ function init() {
   const input = $("file-input");
 
   dropzone.addEventListener("click", () => input.click());
-  input.addEventListener("change", () => { if (input.files[0]) handleFile(input.files[0]); });
+  input.addEventListener("change", () => { if (input.files.length) handleFiles(input.files); });
 
   ["dragenter", "dragover"].forEach(ev => dropzone.addEventListener(ev, e => {
     e.preventDefault();
@@ -166,8 +257,8 @@ function init() {
     dropzone.classList.remove("dragover");
   }));
   dropzone.addEventListener("drop", e => {
-    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f) handleFile(f);
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length) handleFiles(files);
   });
 
   $("btn-generate").addEventListener("click", generate);
