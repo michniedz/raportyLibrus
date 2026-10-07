@@ -138,6 +138,12 @@ legend { font-weight: 600; padding: 0 8px; font-size: .92rem; }
 @media (max-width: 640px) { .grid.two-col { grid-template-columns: 1fr; } }
 
 label { display: flex; flex-direction: column; gap: 5px; font-size: .86rem; font-weight: 500; }
+
+.field { display: flex; flex-direction: column; gap: 5px; font-size: .86rem; font-weight: 500; }
+.field-label { font-weight: 600; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 4px 16px; font-weight: 400; }
+.chip { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 400; }
+.chip input[type="checkbox"] { width: auto; }
 input, select, textarea {
   font: inherit;
   font-weight: 400;

@@ -271,8 +271,15 @@ function generujDocx(model, stats, form, hasRok) {
   // ---- Pkt 17 ----
   children.push(heading("17. Uczniowie z oceną wzorową (uzasadnienie oceny):"));
   children.push(namesParagraph(stats.wzoroweList));
-  if (form.uzasWzorowa) {
-    String(form.uzasWzorowa).split(/\r?\n/).filter(Boolean).forEach(l => children.push(P(l, { italics: true })));
+  {
+    const uzasItems = [];
+    if (Array.isArray(form.uzasWzorowaOptions) && form.uzasWzorowaOptions.length) {
+      uzasItems.push(form.uzasWzorowaOptions.join(", "));
+    }
+    if (form.uzasWzorowa) {
+      String(form.uzasWzorowa).split(/\r?\n/).filter(Boolean).forEach(l => uzasItems.push(l));
+    }
+    uzasItems.forEach(l => children.push(P(l, { italics: true })));
   }
 
   // ---- Pkt 18 ----

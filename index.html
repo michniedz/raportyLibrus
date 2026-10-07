@@ -105,9 +105,17 @@
           <label>Pkt 20 — uczniowie, którzy przerwali naukę (liniami: <code>Imię Nazwisko;przyczyna</code>)
             <textarea id="f-przerwali" rows="3" placeholder="Bogdan Marcel;zmiana miejsca zamieszkania"></textarea>
           </label>
-          <label>Pkt 17 — uzasadnienie oceny wzorowej
-            <textarea id="f-uzas-wzorowa" rows="3" placeholder="Zgodnie z zasadami WSO..."></textarea>
-          </label>
+          <div class="field">
+            <span class="field-label">Pkt 17 — uzasadnienie oceny wzorowej</span>
+            <div class="chip-group" id="uzas-wzorowa-options">
+              <label class="chip"><input type="checkbox" value="Zgodnie z zasadami WSO"> Zgodnie z zasadami WSO</label>
+              <label class="chip"><input type="checkbox" value="udział w konkursach szkolnych i ogólnopolskich"> udział w konkursach szkolnych i ogólnopolskich</label>
+              <label class="chip"><input type="checkbox" value="100% frekwencja"> 100% frekwencja</label>
+              <label class="chip"><input type="checkbox" value="wysokie wyniki nauczania"> wysokie wyniki nauczania</label>
+              <label class="chip"><input type="checkbox" value="wysoka kultura osobista"> wysoka kultura osobista</label>
+            </div>
+            <textarea id="f-uzas-wzorowa" rows="2" placeholder="Własne uzasadnienie (opcjonalnie)..."></textarea>
+          </div>
           <label>Pkt 19 — uzasadnienie oceny nagannej
             <textarea id="f-uzas-naganna" rows="3" placeholder="..."></textarea>
           </label>

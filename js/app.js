@@ -16,6 +16,13 @@ function setStatus(el, text, type) {
 function show(el) { el.classList.remove("hidden"); }
 function hide(el) { el.classList.add("hidden"); }
 
+/** Zwraca wartości zaznaczonych checkboxów w kontenerze (id). */
+function checkedValues(containerId) {
+  const container = $(containerId);
+  if (!container) return [];
+  return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+
 function collectForm() {
   return {
     wychowawca: $("f-wychowawca").value.trim(),
@@ -34,6 +41,7 @@ function collectForm() {
     diagnoza: $("f-diagnoza").value,
     nieklasyfikowani: $("f-nieklasyfikowani").value,
     przerwali: $("f-przerwali").value,
+    uzasWzorowaOptions: checkedValues("uzas-wzorowa-options"),
     uzasWzorowa: $("f-uzas-wzorowa").value,
     uzasNaganna: $("f-uzas-naganna").value,
   };
