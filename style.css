@@ -226,26 +226,62 @@ legend {
 label { display: flex; flex-direction: column; gap: 6px; font-size: .86rem; font-weight: 500; color: #1e293b; }
 
 .field { display: flex; flex-direction: column; gap: 10px; font-size: .86rem; font-weight: 500; }
+.field-full { grid-column: 1 / -1; }
 .field-label { font-weight: 650; }
-.chip-group { display: flex; flex-wrap: wrap; gap: 8px; font-weight: 400; }
-.chip {
-  display: inline-flex;
+
+.check-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 6px 22px;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fbfcfe;
+}
+.check-item {
+  display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  background: #fff;
+  gap: 9px;
   cursor: pointer;
   font-weight: 400;
-  font-size: .85rem;
-  line-height: 1.2;
-  transition: background .12s, border-color .12s;
+  font-size: .88rem;
+  padding: 3px 0;
+  position: relative;
   user-select: none;
 }
-.chip:hover { border-color: var(--primary); background: var(--primary-soft); }
-.chip input[type="checkbox"] { width: auto; accent-color: var(--primary); cursor: pointer; }
-.chip:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.check-item input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.check-box {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s, border-color .12s;
+}
+.check-item:hover .check-box { border-color: var(--primary); }
+.check-item input:focus-visible + .check-box { box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+.check-item input:checked + .check-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.check-item input:checked + .check-box::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
 
 input, select, textarea {
   font: inherit;
