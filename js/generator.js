@@ -100,7 +100,7 @@ function isAnnualType(type) {
 /**
  * Główna funkcja: generuje dokument Word na podstawie modelu, statystyk i formularza.
  */
-function generujDocx(model, stats, form) {
+function generujDocx(model, stats, form, hasRok) {
   const semestr = form.semestr === "I" ? "I" : "II";
   const rok = model.rokSzkolny || "…";
   const isAnnual = isAnnualType(model.type);
@@ -114,8 +114,11 @@ function generujDocx(model, stats, form) {
   children.push(P(`Klasa: ${model.klasa || "…"}    Wychowawca: ${form.wychowawca || "…"}`, { bold: true, alignment: CENTER, spacing: { after: 200 } }));
 
   // ---- Pkt 4 i 5 ----
+  // Data „stanu klasy” to zawsze 1.X (1 października) roku rozpoczęcia roku szkolnego.
+  const startYear = (model.rokSzkolny || "").split(/[/\-–]/)[0].trim();
+  const stanData = `1.X.${startYear || "…"}`;
   children.push(P(
-    `4. Stan klasy na ${form.stanData || "…"}: ${form.stanLiczba || "…"}     5. Stan uczniów w dniu klasyfikacji: ${stats.klasyfikowani}`,
+    `4. Stan klasy na ${stanData}: ${form.stanLiczba || "…"}     5. Stan uczniów w dniu klasyfikacji: ${stats.klasyfikowani}`,
     { spacing: { after: 120 } }
   ));
 
@@ -151,21 +154,35 @@ function generujDocx(model, stats, form) {
     const semOp   = form.frekwOpSem || "";
     const semNsp  = form.frekwNieuspSem || "";
     const semSpz  = form.frekwSpozSem || "";
-    const rokProc = form.frekwProcentRok || "";
-    const rokOp   = form.frekwOpRok || "";
-    const rokNsp  = form.frekwNieuspRok || "";
-    const rokSpz  = form.frekwSpozRok || "";
-    children.push(table([
-      row([
-        cell("", { width: 40, shading: "EEEEEE" }),
-        cell(semColLabel, { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
-        cell("rok szkolny", { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
-      ]),
-      row([cell("Stan frekwencji w %", { width: 40 }), cell(semProc || "—", { width: 30, align: CENTER }), cell(rokProc || "—", { width: 30, align: CENTER })]),
-      row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(semOp || "—", { width: 30, align: CENTER }), cell(rokOp || "—", { width: 30, align: CENTER })]),
-      row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(semNsp || "—", { width: 30, align: CENTER }), cell(rokNsp || "—", { width: 30, align: CENTER })]),
-      row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(semSpz || "—", { width: 30, align: CENTER }), cell(rokSpz || "—", { width: 30, align: CENTER })]),
-    ]));
+
+    if (hasRok) {
+      const rokProc = form.frekwProcentRok || "";
+      const rokOp   = form.frekwOpRok || "";
+      const rokNsp  = form.frekwNieuspRok || "";
+      const rokSpz  = form.frekwSpozRok || "";
+      children.push(table([
+        row([
+          cell("", { width: 40, shading: "EEEEEE" }),
+          cell(semColLabel, { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
+          cell("rok szkolny", { width: 30, align: CENTER, bold: true, shading: "EEEEEE" }),
+        ]),
+        row([cell("Stan frekwencji w %", { width: 40 }), cell(semProc || "—", { width: 30, align: CENTER }), cell(rokProc || "—", { width: 30, align: CENTER })]),
+        row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(semOp || "—", { width: 30, align: CENTER }), cell(rokOp || "—", { width: 30, align: CENTER })]),
+        row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(semNsp || "—", { width: 30, align: CENTER }), cell(rokNsp || "—", { width: 30, align: CENTER })]),
+        row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(semSpz || "—", { width: 30, align: CENTER }), cell(rokSpz || "—", { width: 30, align: CENTER })]),
+      ]));
+    } else {
+      children.push(table([
+        row([
+          cell("", { width: 40, shading: "EEEEEE" }),
+          cell(semColLabel, { width: 60, align: CENTER, bold: true, shading: "EEEEEE" }),
+        ]),
+        row([cell("Stan frekwencji w %", { width: 40 }), cell(semProc || "—", { width: 60, align: CENTER })]),
+        row([cell("Liczba godzin opuszczonych", { width: 40 }), cell(semOp || "—", { width: 60, align: CENTER })]),
+        row([cell("Liczba godzin nieusprawiedliwionych", { width: 40 }), cell(semNsp || "—", { width: 60, align: CENTER })]),
+        row([cell("Liczba spóźnień w klasie", { width: 40 }), cell(semSpz || "—", { width: 60, align: CENTER })]),
+      ]));
+    }
   }
 
   // ---- Pkt 9 ----

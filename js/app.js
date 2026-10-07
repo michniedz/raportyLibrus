@@ -20,7 +20,6 @@ function collectForm() {
   return {
     wychowawca: $("f-wychowawca").value.trim(),
     semestr: $("f-semestr").value,
-    stanData: $("f-stan-data").value.trim(),
     stanLiczba: $("f-stan-liczba").value.trim(),
     frekwProcentRok: $("f-frekw-proc-rok").value.trim(),
     frekwProcentSem: $("f-frekw-proc-sem").value.trim(),
@@ -105,6 +104,14 @@ function fillFrekwencjaForm(model, stats, frekw) {
   const isAnnual = isAnnualType(model.type);
   const sem = frekw.semestr;
   const rok = frekw.rok;
+
+  // Kolumna „rok szkolny” widoczna tylko, gdy jest plik frekwencji "rok"
+  // (2 pliki frekwencji = raport roczny). Przy 1 pliku frekwencji — ukryj.
+  const rokCol = $("frekw-rok-col");
+  if (rokCol) {
+    if (rok) show(rokCol);
+    else hide(rokCol);
+  }
 
   // Kolumna „Semestr / I semestr”
   setVal("f-frekw-proc-sem", sem ? sem.procentObecnosci : "");
@@ -220,7 +227,7 @@ async function generate() {
   btn.disabled = true;
   setStatus($("generate-status"), "Generowanie…");
   try {
-    const doc = generujDocx(currentModel, currentStats, collectForm());
+    const doc = generujDocx(currentModel, currentStats, collectForm(), !!currentFrekwencja.rok);
     const blob = await docx.Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
