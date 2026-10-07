@@ -9,14 +9,16 @@
 <body>
   <div class="container">
     <header>
+      <span class="badge">Generator sprawozdania · Librus Synergia</span>
       <h1>Sprawozdanie wychowawcy klasy</h1>
       <p class="subtitle">Wgraj pliki <strong>CSV</strong> z Librus Synergia („Klasyfikacja" + „Procentowe zestawienie frekwencji"), uzupełnij brakujące pola i pobierz gotowy dokument Word.</p>
     </header>
 
     <!-- KROK 1: WGRANIE PLIKU -->
     <section class="card" id="drop-card">
-      <h2>1. Wgraj pliki z Librusa</h2>
+      <h2><span class="step">1</span> Wgraj pliki z Librusa</h2>
       <div id="dropzone" class="dropzone">
+        <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <p class="dropzone-title"><strong>Przeciągnij tutaj pliki CSV</strong> z Librusa<br><span>albo kliknij, aby wybrać pliki (można kilka naraz)</span></p>
         <p class="hint">Wgraj jednocześnie:<br><strong>1)</strong> raport „Klasyfikacja” (śródroczna / roczna / końcowa) — <strong>Eksport do CSV</strong>,<br><strong>2)</strong> „Procentowe zestawienie frekwencji” (1 plik dla śródrocznej, 2 pliki dla rocznej).<br>Można też wgrać zapisany <strong>PDF</strong> raportu klasyfikacji (opcjonalnie).</p>
         <input type="file" id="file-input" accept=".csv,.pdf,text/csv,application/pdf" multiple hidden>
@@ -26,13 +28,13 @@
 
     <!-- KROK 2: PODSUMOWANIE -->
     <section class="card hidden" id="summary-card">
-      <h2>2. Rozpoznane dane</h2>
+      <h2><span class="step">2</span> Rozpoznane dane</h2>
       <div id="summary" class="summary"></div>
     </section>
 
     <!-- KROK 3: POLA MANUALNE -->
     <section class="card hidden" id="form-card">
-      <h2>3. Pola do uzupełnienia ręcznie</h2>
+      <h2><span class="step">3</span> Pola do uzupełnienia ręcznie</h2>
       <p class="hint">Dane, których nie ma w pliku CSV (uzasadnienia, przyczyny itp.). Pola tabelaryczne można wypełniać liniami, oddzielając kolumny znakiem <code>;</code>.</p>
 
       <fieldset>
@@ -133,7 +135,7 @@
 
     <!-- KROK 4: GENERUJ -->
     <section class="card hidden" id="download-card">
-      <h2>4. Pobierz dokument</h2>
+      <h2><span class="step">4</span> Pobierz dokument</h2>
       <button id="btn-generate" class="btn-primary">Pobierz sprawozdanie (.docx)</button>
       <div id="generate-status" class="file-status"></div>
     </section>
