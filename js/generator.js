@@ -289,8 +289,15 @@ function generujDocx(model, stats, form, hasRok) {
   // ---- Pkt 19 ----
   children.push(heading("19. Uczniowie z oceną naganną (uzasadnienie oceny):"));
   children.push(namesParagraph(stats.naganneList));
-  if (form.uzasNaganna) {
-    String(form.uzasNaganna).split(/\r?\n/).filter(Boolean).forEach(l => children.push(P(l, { italics: true })));
+  {
+    const uzasItems = [];
+    if (Array.isArray(form.uzasNagannaOptions) && form.uzasNagannaOptions.length) {
+      uzasItems.push(form.uzasNagannaOptions.join(", "));
+    }
+    if (form.uzasNaganna) {
+      String(form.uzasNaganna).split(/\r?\n/).filter(Boolean).forEach(l => uzasItems.push(l));
+    }
+    uzasItems.forEach(l => children.push(P(l, { italics: true })));
   }
 
   // ---- Pkt 20 ----

@@ -43,6 +43,7 @@ function collectForm() {
     przerwali: $("f-przerwali").value,
     uzasWzorowaOptions: checkedValues("uzas-wzorowa-options"),
     uzasWzorowa: $("f-uzas-wzorowa").value,
+    uzasNagannaOptions: checkedValues("uzas-naganna-options"),
     uzasNaganna: $("f-uzas-naganna").value,
   };
 }

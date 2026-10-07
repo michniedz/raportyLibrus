@@ -139,11 +139,27 @@ legend { font-weight: 600; padding: 0 8px; font-size: .92rem; }
 
 label { display: flex; flex-direction: column; gap: 5px; font-size: .86rem; font-weight: 500; }
 
-.field { display: flex; flex-direction: column; gap: 5px; font-size: .86rem; font-weight: 500; }
+.field { display: flex; flex-direction: column; gap: 9px; font-size: .86rem; font-weight: 500; }
 .field-label { font-weight: 600; }
-.chip-group { display: flex; flex-wrap: wrap; gap: 4px 16px; font-weight: 400; }
-.chip { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 400; }
-.chip input[type="checkbox"] { width: auto; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; font-weight: 400; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: .85rem;
+  line-height: 1.2;
+  transition: background .12s, border-color .12s;
+  user-select: none;
+}
+.chip:hover { border-color: var(--primary); background: var(--primary-soft); }
+.chip input[type="checkbox"] { width: auto; accent-color: var(--primary); cursor: pointer; }
+.chip:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
 input, select, textarea {
   font: inherit;
   font-weight: 400;
