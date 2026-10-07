@@ -395,3 +395,36 @@ footer {
   text-align: center;
   margin-top: 20px;
 }
+
+.privacy-box {
+  margin: 12px auto 0;
+  max-width: 640px;
+}
+.privacy-box summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: .8rem;
+  list-style: none;
+}
+.privacy-box summary::-webkit-details-marker { display: none; }
+.privacy-box summary:hover { color: var(--primary); }
+.privacy-box summary::after { content: "▾"; transition: transform .15s; }
+.privacy-box[open] summary::after { transform: rotate(180deg); }
+.privacy-content {
+  margin-top: 10px;
+  text-align: left;
+  font-size: .78rem;
+  color: var(--muted);
+  line-height: 1.55;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.privacy-content p { margin: 0 0 8px; }
+.privacy-content p:last-child { margin-bottom: 0; }
+.privacy-content strong { color: #475569; }
