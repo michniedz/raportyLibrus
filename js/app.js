@@ -136,14 +136,10 @@ function fillFrekwencjaForm(model, stats, frekw, srodrocznaSpoz) {
 
   // Kolumna „rok szkolny”
   setVal("f-frekw-proc-rok", rok ? rok.procentObecnosci : "");
-  if (rok) {
-    setVal("f-frekw-op-rok", rok.godzinyOpuszczone);
-    setVal("f-frekw-nieusp-rok", rok.godzinyNieusprawiedliwione);
-    setVal("f-frekw-spoz-rok", isAnnual ? stats.spoznienia : "");
-  } else if (isAnnual) {
-    // brak pliku "rok" — fallback na klasyfikację roczną/końcową
-    setVal("f-frekw-op-rok", stats.godzinyOpuszczone);
-    setVal("f-frekw-nieusp-rok", stats.godzinyNieusprawiedliwione);
+  if (isAnnual) {
+    setVal("f-frekw-op-rok", rok ? rok.godzinyOpuszczone : stats.godzinyOpuszczone);
+    setVal("f-frekw-nieusp-rok", rok ? rok.godzinyNieusprawiedliwione : stats.godzinyNieusprawiedliwione);
+    // spóźnienia w „rok szkolny” = suma spóźnień z klasyfikacji rocznej/końcowej
     setVal("f-frekw-spoz-rok", stats.spoznienia);
   } else {
     setVal("f-frekw-op-rok", "");
