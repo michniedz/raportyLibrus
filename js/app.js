@@ -5,6 +5,7 @@
 let currentModel = null;
 let currentStats = null;
 let currentFrekwencja = { semestr: null, rok: null };
+let currentSrodrocznaSpoz = null; // suma spóźnień z I semestru (klasyfikacja śródroczna)
 
 const $ = (id) => document.getElementById(id);
 
@@ -102,7 +103,7 @@ function setVal(id, val) {
   if (el) el.value = (val == null ? "" : String(val));
 }
 
-function fillFrekwencjaForm(model, stats, frekw) {
+function fillFrekwencjaForm(model, stats, frekw, srodrocznaSpoz) {
   const isAnnual = isAnnualType(model.type);
   const sem = frekw.semestr;
   const rok = frekw.rok;
@@ -118,10 +119,14 @@ function fillFrekwencjaForm(model, stats, frekw) {
   // Kolumna „Semestr / I semestr”
   setVal("f-frekw-proc-sem", sem ? sem.procentObecnosci : "");
   if (isAnnual) {
-    // dane I semestru pochodzą z pliku frekwencji "semestr"
+    // dane II semestru pochodzą z pliku frekwencji "semestr"
     setVal("f-frekw-op-sem", sem ? sem.godzinyOpuszczone : "");
     setVal("f-frekw-nieusp-sem", sem ? sem.godzinyNieusprawiedliwione : "");
-    setVal("f-frekw-spoz-sem", ""); // spóźnień nie ma w plikach frekwencji
+    // spóźnienia II sem. = cały rok − I semestr (z klasyfikacji śródrocznej)
+    const semSpoz = (srodrocznaSpoz != null)
+      ? Math.max(0, stats.spoznienia - srodrocznaSpoz)
+      : "";
+    setVal("f-frekw-spoz-sem", semSpoz);
   } else {
     // śródroczna: semestr liczony z klasyfikacji
     setVal("f-frekw-op-sem", stats.godzinyOpuszczone);
@@ -152,7 +157,8 @@ async function handleFiles(fileList) {
   const status = $("file-status");
   if (!files.length) return;
 
-  let classification = null;
+  let rocznaClassification = null;     // klasyfikacja roczna / końcowa
+  let srodrocznaClassification = null; // klasyfikacja śródroczna (I semestr)
   const frekwencjaFiles = [];
   const warnings = [];
   let pdfjsLib = null;
@@ -166,13 +172,17 @@ async function handleFiles(fileList) {
           pdfjsLib = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
           pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
         }
-        classification = await parseLibrusPdf(await file.arrayBuffer(), pdfjsLib);
+        const m = await parseLibrusPdf(await file.arrayBuffer(), pdfjsLib);
+        if (isAnnualType(m.type)) rocznaClassification = m;
+        else srodrocznaClassification = m;
       } else {
         const buffer = await file.arrayBuffer();
         const text = decodeLibrusFile(buffer);
         const type = detectFileType(text);
         if (type === "klasyfikacja") {
-          classification = parseLibrusCSV(text);
+          const m = parseLibrusCSV(text);
+          if (isAnnualType(m.type)) rocznaClassification = m;
+          else srodrocznaClassification = m;
         } else if (type === "frekwencja") {
           const f = parseFrekwencjaCSV(text);
           f.sourceName = file.name;
@@ -183,17 +193,21 @@ async function handleFiles(fileList) {
       }
     }
 
+    const classification = rocznaClassification || srodrocznaClassification;
     if (!classification) {
       throw new Error("Nie znaleziono pliku klasyfikacji („Klasyfikacja …”). Dodaj go razem z plikami frekwencji.");
     }
 
     currentModel = classification;
     currentStats = computeStats(currentModel);
+    currentSrodrocznaSpoz = (rocznaClassification && srodrocznaClassification)
+      ? computeStats(srodrocznaClassification).spoznienia
+      : null;
     currentFrekwencja = classifyFrekwencja(frekwencjaFiles);
 
     renderSummary(currentModel, currentStats, currentFrekwencja);
     applyModelToForm(currentModel);
-    fillFrekwencjaForm(currentModel, currentStats, currentFrekwencja);
+    fillFrekwencjaForm(currentModel, currentStats, currentFrekwencja, currentSrodrocznaSpoz);
 
     show($("summary-card"));
     show($("form-card"));
@@ -201,6 +215,7 @@ async function handleFiles(fileList) {
 
     const parts = [`Wczytano ${files.length} ${files.length === 1 ? "plik" : "pliki"}`];
     parts.push(`klasyfikacja: ${currentModel.students.length} uczniów`);
+    if (currentSrodrocznaSpoz != null) parts.push("+ śródroczna (spóźnienia II sem.)");
     if (currentFrekwencja.semestr || currentFrekwencja.rok) {
       const labels = [];
       if (currentFrekwencja.semestr) labels.push("semestr");
@@ -213,6 +228,7 @@ async function handleFiles(fileList) {
     currentModel = null;
     currentStats = null;
     currentFrekwencja = { semestr: null, rok: null };
+    currentSrodrocznaSpoz = null;
     hide($("summary-card"));
     hide($("form-card"));
     hide($("download-card"));
