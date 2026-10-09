@@ -187,22 +187,23 @@ function generujDocx(model, stats, form, hasRok) {
 
   // ---- Pkt 9 ----
   children.push(heading("9. Przedmioty, z których uzyskano więcej niż 3 oceny ndst (podać liczbę ocen):"));
-  children.push(hr());
   if (stats.przedmiotyPonad3Ndst.length) {
     stats.przedmiotyPonad3Ndst.forEach(x => children.push(P(`${x.przedmiot} — ${x.liczba} ocen`)));
+  } else {
+    children.push(hr());
   }
 
   // ---- Pkt 10 ----
   children.push(heading("10. Uczniowie z 3 i więcej ocenami niedostatecznymi (wraz z uzasadnieniem przyczyn niepowodzenia):"));
-  children.push(hr());
   if (stats.uczniowie3PlusNdst.length) {
     stats.uczniowie3PlusNdst.forEach(x => children.push(P(`${x.nazwisko} (${x.liczbaNdst} ocen ndst)`)));
-  } else {
-    children.push(P("—"));
   }
   if (form.przyczynyNdst) {
     children.push(P("Przyczyny niepowodzenia:", { bold: true, spacing: { before: 80 } }));
     String(form.przyczynyNdst).split(/\r?\n/).filter(Boolean).forEach(l => children.push(P(l)));
+  }
+  if (!stats.uczniowie3PlusNdst.length && !form.przyczynyNdst) {
+    children.push(hr());
   }
 
   // ---- Pkt 11 ----
@@ -218,7 +219,7 @@ function generujDocx(model, stats, form, hasRok) {
   if (form.osiagniecia) {
     String(form.osiagniecia).split(/\r?\n/).filter(Boolean).forEach(l => children.push(P(l)));
   } else {
-    children.push(P("—"));
+    children.push(hr());
   }
 
   // ---- Pkt 13 ----
@@ -240,9 +241,10 @@ function generujDocx(model, stats, form, hasRok) {
 
   // ---- Pkt 14 ----
   children.push(heading("14. Przedmioty, z których odbyły się diagnostyczne sprawdziany dyrektorskie lub matura próbna:"));
-  children.push(hr());
   if (form.diagnoza) {
     String(form.diagnoza).split(/\r?\n/).filter(Boolean).forEach(l => children.push(P(l)));
+  } else {
+    children.push(hr());
   }
 
   // ---- Pkt 15 ----
