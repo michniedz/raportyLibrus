@@ -97,10 +97,16 @@ function isAnnualType(type) {
   return t.includes("roczna") || t.includes("końcowa") || t.includes("kocowa");
 }
 
+/** Czy typ raportu to klasyfikacja końcowa (klas 5/3). */
+function isKoncowaType(type) {
+  const t = (type || "").toLowerCase();
+  return t.includes("końcowa") || t.includes("kocowa");
+}
+
 /**
  * Główna funkcja: generuje dokument Word na podstawie modelu, statystyk i formularza.
  */
-function generujDocx(model, stats, form, hasRok) {
+function generujDocx(model, stats, form, hasRok, sredniaKlasy) {
   const rok = model.rokSzkolny || "…";
   const isAnnual = isAnnualType(model.type);
   // śródroczna = semestr I, roczna/końcowa = cały rok szkolny
@@ -138,6 +144,9 @@ function generujDocx(model, stats, form, hasRok) {
     row([cell("liczba ocen celujących w klasie", { width: 25 }), cell(String(stats.ocenyCelujace), { width: 12, align: CENTER }), cell("nagannych", { width: 25 }), cell(String(z.naganne), { width: 12, align: CENTER })]),
     row([cell("liczba ocen dopuszczających w klasie", { width: 25 }), cell(String(stats.ocenyDopuszczajace), { width: 12, align: CENTER }), cell("", { width: 25 }), cell("", { width: 12 })]),
   ]));
+  if (sredniaKlasy) {
+    children.push(P(`Średnia ocen klasy:  ${sredniaKlasy}`, { spacing: { before: 60 } }));
+  }
 
   // ---- Pkt 7 ----
   children.push(heading("7. Najwyższa / najniższa średnia:"));

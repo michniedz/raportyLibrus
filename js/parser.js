@@ -169,12 +169,23 @@ function parseLibrusCSV(text) {
     throw new Error("Nie znaleziono żadnych uczniów w pliku.");
   }
 
+  // średnia klasy — ostatnia wartość wiersza podsumowania „Liczby ocen”
+  let sredniaKlasy = "";
+  for (const r of rows) {
+    if (/^Liczby ocen/i.test(r[0] || "")) {
+      const vals = r.filter(c => c !== "");
+      if (vals.length) sredniaKlasy = vals[vals.length - 1];
+      break;
+    }
+  }
+
   return {
     type,
     klasa,
     rokSzkolny,
     subjects,
     students,
+    sredniaKlasy,
   };
 }
 
@@ -206,9 +217,10 @@ function parseFrekwencjaCSV(text) {
   let miesiac = "";
   for (const r of rows) {
     const first = (r[0] || "").trim();
-    if (/^Klasa$/i.test(first)) klasa = (r[1] || "").trim();
-    else if (/^Rok szkolny/i.test(first)) rokSzkolny = first.replace(/^Rok szkolny\s*/i, "").trim();
-    else if (/^Miesi[iąą]c$/i.test(first)) miesiac = (r[1] || "").trim();
+    const second = (r[1] || "").trim();
+    if (/^Klasa/i.test(first)) klasa = first.replace(/^Klasa\s*/i, "").trim() || second;
+    else if (/^Rok szkolny/i.test(first)) rokSzkolny = first.replace(/^Rok szkolny\s*/i, "").trim() || second;
+    else if (/^(Miesi[iąą]c|Okres)/i.test(first)) miesiac = first.replace(/^(Miesi[iąą]c|Okres)\s*:?\s*/i, "").trim() || second;
   }
 
   let razem = null;
@@ -229,6 +241,26 @@ function parseFrekwencjaCSV(text) {
   const razemGodz = razem[6] ? toInt(razem[6]) : (obecnosci + opuszczone);
   const procentObecnosci = (razem[7] || "").trim();
 
+  // lista uczniów (do wykrycia uczniów ze 100% frekwencją)
+  const students = [];
+  let studentHeaderIdx = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i][0] === "Nr") { studentHeaderIdx = i; break; }
+  }
+  if (studentHeaderIdx !== -1) {
+    for (let i = studentHeaderIdx + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || /^RAZEM/i.test(r[0] || "")) break;
+      if (!r[0]) continue; // pomiń wiersz nagłówka „;;;uspr.;…"
+      const nieobRazem = r[5] ? toInt(r[5]) : (toInt(r[3]) + toInt(r[4]));
+      students.push({
+        nazwisko: (r[1] || "").trim(),
+        nieobecnosciRazem: nieobRazem,
+        procentObecnosci: (r[7] || "").trim(),
+      });
+    }
+  }
+
   return {
     klasa,
     rokSzkolny,
@@ -238,6 +270,7 @@ function parseFrekwencjaCSV(text) {
     godzinyNieusprawiedliwione: nieusprNieus, // nieobecności nieusprawiedliwione
     godzinyUsprawiedliwione: nieusprUsp,
     godzinyObowiazkowe: razemGodz,           // obecności + nieobecności (razem)
+    students,
   };
 }
 
@@ -260,7 +293,7 @@ function classifyFrekwencja(files) {
   // Remis liczbowy — spróbuj po nazwie pliku.
   if (rok.godzinyObowiazkowe === semestr.godzinyObowiazkowe) {
     const byName = (re) => files.find(f => re.test(f.sourceName || ""));
-    const rokByName = byName(/rocz|kocow|koncow|caly|calorocz/i);
+    const rokByName = byName(/rok|rocz|caly|calorocz|wszystko/i);
     const semByName = byName(/semestr|srodrocz|r\u00f3drocz/i);
     if (rokByName && semByName) { rok = rokByName; semestr = semByName; }
   }
